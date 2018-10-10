@@ -36,3 +36,11 @@ def save(data, fs, path):
     # as computation of spectrograms is not a bottleneck at all.
     f, t, s = signal.spectrogram(x=data, fs=fs, nperseg=nperseg)
     
+def batch_get(data_iterable, fs):
+    specgrams = list()
+    
+    for waveform in data_iterable:
+        f, t, s = get(waveform, fs)
+        specgrams.append(s)
+
+    return specgrams

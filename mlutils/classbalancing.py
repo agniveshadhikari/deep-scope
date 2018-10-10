@@ -5,7 +5,6 @@ import pandas as pd
 def oversample(dataframe, column):
     classes, counts = unique(dataframe[column], return_counts=True)
     max_size = max(counts)
-    additional_df = pd.DataFrame()
     indices_to_repeat = list()
 
     for c in classes:
@@ -23,7 +22,7 @@ def oversample(dataframe, column):
         indices_to_repeat.extend(indices_to_repeat_for_c)
 
 
-    oversampled_dataframe = dataframe.append(dataframe.iloc[indices_to_repeat, :], ignore_index=True)
+    oversampled_dataframe = dataframe.append(dataframe.loc[indices_to_repeat, :], ignore_index=True)
 
     return oversampled_dataframe
 

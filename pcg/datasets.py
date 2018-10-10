@@ -59,11 +59,8 @@ class PhysionetCinC:
         # cols: fs, waveform
         wav_data = PhysionetCinC._get_data(subset)
 
-        # Stack the wav data and the labels horizontally
-        # cols: id, label, fs, waveform
-        # raw_data = np.hstack([wav_data, labels])
-
-        # Append this subset's data to the dataframe to be returned
+        # Construct a dataframe and return. Note the need to transpose.
+        # cols: id, waveform, label, fs
         return pd.DataFrame([labels.id, wav_data.waveform, labels.label, wav_data.fs]).T
 
     @staticmethod

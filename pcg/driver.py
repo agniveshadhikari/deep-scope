@@ -11,75 +11,67 @@ from pcg.datasets import PhysionetCinC as PCC
 from pcg.metrics import ConfusionMatrix
 # Misc
 from pprint import pprint
-# Preprocessing
+# Getting the dataset in order
 from keras.preprocessing.sequence import pad_sequences
 from sklearn.utils import shuffle
+from sklearn.model_selection import train_test_split
+from mlutils.classbalancing import oversample
 
 # TODO implement command line args for this file. Num-epochs, batch size, dataset,
 #       num_samples to be used for training so on and so forth
 
-
-# TODO move the fetching dataset portion to the datasets.py file
-#       Every dataset class shall have a get_dataset function that should return the dataset in (x, y) format directly
+# TODO Maybe move spectrogram padding to spectrogram.py
 
 
-# Storing the spectrograms
-specgrams = list()
-for i in range(1, 401):
-    wavfilepath = os.path.join(PCC.base_path, 'training-a', 'a'+str(i).zfill(4)+'.wav')
-    fs, data = wavfile.read(wavfilepath)
-    f, t, s = spectrogram.get(data, fs=fs)
-    s_padded = pad_sequences(s, 165, dtype='float32')
-    specgrams.append(s_padded.T)
+# Get the data for training-a
+print('Reading Dataset...')
+data = PCC.get_subset('training-a')
 
-specgrams = np.array(specgrams)
+# Compute the spectrograms and add as a column to data
+print('Computing Spectrograms...')
+data['spectrogram'] = [pad_sequences(s, 165, 'float32').T
+                       for s in spectrogram.batch_get(data['waveform'], data['fs'][0])]
 
-
-
-# Loading the labels
-labels = np.array([
-            1 if label=='1' else 0
-            for filename, label
-            in csv.reader(open(os.path.join(PCC.base_path,
-                                            'training-a',
-                                            'REFERENCE.csv')))
-         ][:400])
-
-# Class count equalization, and separation of train and test data. 
-# TODO have better randomized train test splits. sklearn.model_selection.StratifiedKFold
-sorted_indices = np.argsort(labels)
-t_composition = np.hstack([sorted_indices[0:100], sorted_indices[0:100], sorted_indices[200:400]])
-# t_composition = np.hstack([sorted_indices[0:100], sorted_indices[200:300]])
-t_labels = labels[t_composition]
-t_specgrams = specgrams[t_composition]
-
-v_composition = sorted_indices[100:160]
-# v_composition = np.hstack([sorted_indices[100:200], sorted_indices[300:400]])
-v_specgrams = specgrams[v_composition]
-v_labels = labels[v_composition]
-
-# Shuffle the train set
-t_specgrams, t_labels = shuffle(t_specgrams, t_labels)
+# Make train test split
+# TODO Use stratification? stratify=data['label'] should work in my understanding
+#       But the default is to shuffle, so statistically it shouldn't be a problem
+print('Splitting dataset into test and train sets...')
+data_train, data_test = train_test_split(data)
 
 # Sanity Check
-print(np.unique(labels, return_counts=True))
-print(np.unique(t_labels, return_counts=True))
-print(np.unique(v_labels, return_counts=True))
+print('Test Train Split Stats:\n')
+print('Training size:', len(data_train))
+print('Test size:   :', len(data_test))
+print('Class Distribution Training:', np.unique(data_train['label'], return_counts=True))
+print('Class Distribution Test    :', np.unique(data_test['label'], return_counts=True))
+
+# Oversample train and test separately
+print('Oversampling to balance classes...')
+data_train = oversample(data_train, 'label')
+data_test = oversample(data_test, 'label')
+
+# Sanity Check
+print('Test Train Split Stats after Oversampling:\n')
+print('Training size:', len(data_train))
+print('Test size:   :', len(data_test))
+print('Class Distribution Training:', np.unique(data_train['label'], return_counts=True))
+print('Class Distribution Test    :', np.unique(data_test['label'], return_counts=True))
 
 # Training
+print('Training the model...')
 kerasmodels.model.compile(loss='binary_crossentropy',
                           optimizer='rmsprop',
                           metrics=['accuracy'])
 
-kerasmodels.model.fit(t_specgrams, t_labels, batch_size=400, epochs=5, validation_data=(v_specgrams, v_labels))
+kerasmodels.model.fit(np.stack(data_train['spectrogram']), np.stack(data_train['label']),
+                      batch_size=400, 
+                      epochs=5,
+                      validation_data=(np.stack(data_test['spectrogram']), np.stack(data_test['label'].values)))
 
-t_preds = np.round(kerasmodels.model.predict(t_specgrams))
+# Confusion Matrix
+print('Calculating the Confusion Matrix...')
+train_preds = np.round(kerasmodels.model.predict(np.stack(data_train['spectrogram']))).astype('int32')
+test_preds = np.round(kerasmodels.model.predict(np.stack(data_test['spectrogram']))).astype('int32')
 
-v_preds = np.round(kerasmodels.model.predict(v_specgrams))
-
-# Visualization of results
-# for i in range(400):
-#     print(preds[i], '\t', labels[i], '\t', np.round(preds[i])==labels[i])
-
-ConfusionMatrix(t_labels, t_preds, ['Normal', 'Abnormal']).plot('Test Confusion Matrix')
-ConfusionMatrix(v_labels, v_preds, ['Normal', 'Abnormal']).plot('Validation Confusion Matrix')
+ConfusionMatrix(data_train['label'], train_preds, ['Normal', 'Abnormal']).plot('Test Confusion Matrix')
+ConfusionMatrix(data_test['label'], test_preds, ['Normal', 'Abnormal']).plot('Validation Confusion Matrix')
