@@ -1,27 +1,29 @@
 import scipy.signal as signal
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
 
 # TODO Wrap the functions into a class, with instance vars fs and nperseg
 
-nperseg = 500
+default_nperseg = 100
 
-def get(data, fs):
+def get(data, fs, nperseg=None, noverlap=None, scaled=True):
     # TODO Check the doc page for signal.spectrogram. Below, there are
     # a couple of different methods to find the PSD for a waveform.
     # One task is to compare how those match up to regular spectrograms.
-
-    # TODO The frequencis are consistent. But the interval is 7.something
-    # Find if it is actually fixed to this arbitrary 7.xx and why
-
     # TODO One hyperparameter is the spectrogram resolution in the time domain.
     # Find the lowest res which can still give the base accuracy.
     # TODO Another hyperarameter is the frequency domain resolution.
     # Less samples => less compute
-    f, t, s = signal.spectrogram(x=data, fs=fs, nperseg=nperseg)
+    if nperseg is None:
+        nperseg = default_nperseg
+    f, t, s = signal.spectrogram(x=data, fs=fs, nperseg=nperseg, noverlap=noverlap)
+
+    if scaled:
+        s_scaled = StandardScaler().fit_transform(s.T).T
     return f, t, s
 
-def plot(data, fs):
-    f, t, s = signal.spectrogram(x=data, fs=fs, nperseg=nperseg)
+def plot(data, fs, nperseg=None, noverlap=None):
+    f, t, s = get(data, fs, nperseg, noverlap)
     plt.pcolormesh(t, f, s)
     plt.ylim(ymax=400)
     plt.xlim(xmax=10)
@@ -34,7 +36,7 @@ def plot(data, fs):
 def save(data, fs, path):
     # TODO Complete this. Right now it's not required 
     # as computation of spectrograms is not a bottleneck at all.
-    f, t, s = signal.spectrogram(x=data, fs=fs, nperseg=nperseg)
+    f, t, s = get(data, fs)
     
 def batch_get(data_iterable, fs):
     specgrams = list()

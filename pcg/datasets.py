@@ -23,7 +23,7 @@ class PhysionetCinC:
     def _get_labels(subset='training-a'):
         return pd.DataFrame(
             [
-                (filename, 1 if label == '1' else 0)
+                [filename, 1 if label == '1' else 0]
                 for filename, label
                 in csv.reader(open(os.path.join(PhysionetCinC.base_path,
                                                 subset,
@@ -61,7 +61,12 @@ class PhysionetCinC:
 
         # Construct a dataframe and return. Note the need to transpose.
         # cols: id, waveform, label, fs
-        return pd.DataFrame([labels.id, wav_data.waveform, labels.label, wav_data.fs]).T
+        return pd.DataFrame({
+            'id': labels.id,
+            'waveform': wav_data.waveform,
+            'label': labels.label,
+            'fs': wav_data.fs
+        })
 
     @staticmethod
     def get_all_subsets():

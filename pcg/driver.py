@@ -8,7 +8,7 @@ import os
 # Local modules
 from pcg.specrnn import spectrogram, kerasmodels
 from pcg.datasets import PhysionetCinC as PCC
-from pcg.metrics import ConfusionMatrix
+from pcg.metrics import ConfusionMatrix, TrainingHistory
 # Misc
 from pprint import pprint
 # Getting the dataset in order
@@ -29,14 +29,14 @@ data = PCC.get_subset('training-a')
 
 # Compute the spectrograms and add as a column to data
 print('Computing Spectrograms...')
-data['spectrogram'] = [pad_sequences(s, 165, 'float32').T
+data['spectrogram'] = [pad_sequences(s, 900, 'float32').T
                        for s in spectrogram.batch_get(data['waveform'], data['fs'][0])]
 
 # Make train test split
 # TODO Use stratification? stratify=data['label'] should work in my understanding
 #       But the default is to shuffle, so statistically it shouldn't be a problem
 print('Splitting dataset into test and train sets...')
-data_train, data_test = train_test_split(data)
+data_train, data_test = train_test_split(data, test_size=0.2)
 
 # Sanity Check
 print('Test Train Split Stats:\n')
@@ -63,15 +63,18 @@ kerasmodels.model.compile(loss='binary_crossentropy',
                           optimizer='rmsprop',
                           metrics=['accuracy'])
 
-kerasmodels.model.fit(np.stack(data_train['spectrogram']), np.stack(data_train['label']),
-                      batch_size=400, 
-                      epochs=5,
+history = kerasmodels.model.fit(np.stack(data_train['spectrogram']), np.stack(data_train['label']),
+                      batch_size=500, 
+                      epochs=10,
                       validation_data=(np.stack(data_test['spectrogram']), np.stack(data_test['label'].values)))
 
+# Training history visualization
+TrainingHistory(history).plot()
+
 # Confusion Matrix
-print('Calculating the Confusion Matrix...')
+print('Calculating the Confusion Matrices...')
 train_preds = np.round(kerasmodels.model.predict(np.stack(data_train['spectrogram']))).astype('int32')
 test_preds = np.round(kerasmodels.model.predict(np.stack(data_test['spectrogram']))).astype('int32')
 
-ConfusionMatrix(data_train['label'], train_preds, ['Normal', 'Abnormal']).plot('Test Confusion Matrix')
-ConfusionMatrix(data_test['label'], test_preds, ['Normal', 'Abnormal']).plot('Validation Confusion Matrix')
+ConfusionMatrix(data_train['label'].values, train_preds, ['Normal', 'Abnormal']).plot('Test Confusion Matrix')
+ConfusionMatrix(data_test['label'].values, test_preds, ['Normal', 'Abnormal']).plot('Validation Confusion Matrix')
