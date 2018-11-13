@@ -72,5 +72,5 @@ class TrainingHistory:
         plt.ylabel('Loss')
         plt.xlabel('Epoch')
         plt.ylim(top=1, bottom=0)
-        plt.legend(['Train Accuracy', 'Test Accuracy', 'Train Loss', 'Test Loss'], loc='best')
+        plt.legend(['Train Loss', 'Test Loss'], loc='best')
         plt.show()

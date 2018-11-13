@@ -13,6 +13,7 @@ from pcg.metrics import ConfusionMatrix, TrainingHistory
 from pprint import pprint
 # Getting the dataset in order
 from keras.preprocessing.sequence import pad_sequences
+from keras.optimizers import RMSprop
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
 from mlutils.classbalancing import oversample
@@ -36,9 +37,16 @@ data['spectrogram'] = [pad_sequences(s, 900, 'float32').T
 # TODO Use stratification? stratify=data['label'] should work in my understanding
 #       But the default is to shuffle, so statistically it shouldn't be a problem
 print('Splitting dataset into test and train sets...')
-data_train, data_test = train_test_split(data, test_size=0.2)
+data_train, data_test = train_test_split(data, test_size=0.2, random_state=0) #TODO randomstate
 
-# Sanity Check
+# Sanity Check on shuffles
+print('Train Test Split:')
+print('Train Set:')
+print(data_train.head())
+print('Test Set')
+print(data_test.head())
+
+# Sanity Check on distribution
 print('Test Train Split Stats:\n')
 print('Training size:', len(data_train))
 print('Test size:   :', len(data_test))
@@ -60,12 +68,12 @@ print('Class Distribution Test    :', np.unique(data_test['label'], return_count
 # Training
 print('Training the model...')
 kerasmodels.model.compile(loss='binary_crossentropy',
-                          optimizer='rmsprop',
+                          optimizer=RMSprop(0.0005),
                           metrics=['accuracy'])
 
 history = kerasmodels.model.fit(np.stack(data_train['spectrogram']), np.stack(data_train['label']),
-                      batch_size=500, 
-                      epochs=10,
+                      batch_size=500,
+                      epochs=1000,
                       validation_data=(np.stack(data_test['spectrogram']), np.stack(data_test['label'].values)))
 
 # Training history visualization
