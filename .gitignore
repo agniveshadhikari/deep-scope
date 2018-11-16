@@ -1,5 +1,5 @@
-# VS Code
-.vscode/
+# VS Code. Not ignored.
+# .vscode/
 
 # Virtual Environment
 venv/
