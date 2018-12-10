@@ -74,7 +74,7 @@ class ConfusionMatrix:
         if not path[-1] == '/':
             path = path + '/'
 
-        filename = path + title + '.jpg'
+        filename = path + title + '.svg'
         plt.savefig(filename)
 
 
@@ -122,4 +122,4 @@ class TrainingHistory:
         plt.xlabel('Epoch')
         plt.ylim(top=1, bottom=0)
         plt.legend(['Train Loss', 'Test Loss'], loc='best')
-        plt.savefig(path + 'Training History.jpg')
+        plt.savefig(path + 'Training History.svg')
