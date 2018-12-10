@@ -7,10 +7,10 @@ from sklearn.preprocessing import StandardScaler
 
 default_nperseg = 100
 
-def get(data, fs, nperseg=None, noverlap=None, scaled=True):
+def get(data, fs, nperseg=None, noverlap=None, scaled=False):
     # TODO Check the doc page for signal.spectrogram. Below, there are
     # a couple of different methods to find the PSD for a waveform.
-    # One task is to compare how those match up to regular spectrograms.
+    # Compare how those match up to regular spectrograms.
     # TODO One hyperparameter is the spectrogram resolution in the time domain.
     # Find the lowest res which can still give the base accuracy.
     # TODO Another hyperarameter is the frequency domain resolution.
@@ -22,8 +22,9 @@ def get(data, fs, nperseg=None, noverlap=None, scaled=True):
 
     if scaled:
         s_scaled = StandardScaler().fit_transform(s.T).T
+        s = s_scaled
 
-    return f, t, s_scaled
+    return f, t, s
 
 def plot(data, fs, nperseg=None, noverlap=None):
     f, t, s = get(data, fs, nperseg, noverlap)

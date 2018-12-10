@@ -10,3 +10,5 @@ __pycache__
 
 # Throwaway files, containing the substring 'delete'
 *delete*
+
+datasets/

@@ -37,7 +37,7 @@ data['spectrogram'] = [pad_sequences(s, 900, 'float32').T
 # TODO Use stratification? stratify=data['label'] should work in my understanding
 #       But the default is to shuffle, so statistically it shouldn't be a problem
 print('Splitting dataset into test and train sets...')
-data_train, data_test = train_test_split(data, test_size=0.2, random_state=0) #TODO randomstate
+data_train, data_test = train_test_split(data, test_size=0.2)
 
 # Sanity Check on shuffles
 print('Train Test Split:')
@@ -73,7 +73,7 @@ kerasmodels.model.compile(loss='binary_crossentropy',
 
 history = kerasmodels.model.fit(np.stack(data_train['spectrogram']), np.stack(data_train['label']),
                       batch_size=500,
-                      epochs=1000,
+                      epochs=100,
                       validation_data=(np.stack(data_test['spectrogram']), np.stack(data_test['label'].values)))
 
 # Training history visualization

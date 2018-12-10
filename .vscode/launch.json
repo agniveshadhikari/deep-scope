@@ -8,7 +8,7 @@
             "name": "Python: PCG/driver.py",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/pcg/driver.py",
+            "program": "${workspaceFolder}/driver.py",
             "console": "integratedTerminal"
         },
         {
