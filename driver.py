@@ -90,14 +90,19 @@ os.makedirs(log_path)
 TrainingHistory(history).save(log_path)
 
 # Saving the model configuration
-raw_json = open(log_path + 'model.json', 'w')
+raw_json = open(log_path + 'model_architecture.json', 'w')
 raw_json.write(kerasmodels.model.to_json())
 raw_json.close()
 
-pretty_json = open(log_path + 'model.txt', 'w')
+pretty_json = open(log_path + 'model_description.txt', 'w')
 pretty_json.write(pformat(kerasmodels.model.to_json()))
 pretty_json.close()
 
+# Save weights
+kerasmodels.model.save_weights(log_path + 'weights.h5')
+
+# Save the model
+kerasmodels.model.save(log_path + 'model.h5')
 
 # Confusion Matrix
 print('Calculating the Confusion Matrices...')
