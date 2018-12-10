@@ -91,7 +91,7 @@ for model in kerasmodels.models:
 
         history = kerasmodels.model.fit(np.stack(data_train['spectrogram']), np.stack(data_train['label']),
                             batch_size=500,
-                            epochs=2,
+                            epochs=200,
                             validation_data=(np.stack(data_test['spectrogram']), np.stack(data_test['label'].values)))
 
 
