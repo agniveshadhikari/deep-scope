@@ -1,8 +1,10 @@
 # File formats
 import csv
 from scipy.io import wavfile
+from pprint import pformat
 import numpy as np
 # OS level ops
+from datetime import datetime
 from glob import iglob
 import os
 # Local modules
@@ -23,6 +25,8 @@ from mlutils.classbalancing import oversample
 
 # TODO Maybe move spectrogram padding to spectrogram.py
 
+start_time = datetime.now()
+print('Starting at time', start_time)
 
 # Get the data for training-a
 print('Reading Dataset...')
@@ -76,13 +80,29 @@ history = kerasmodels.model.fit(np.stack(data_train['spectrogram']), np.stack(da
                       epochs=100,
                       validation_data=(np.stack(data_test['spectrogram']), np.stack(data_test['label'].values)))
 
+
+# Create directory for logging
+formatted_dt = start_time.strftime('%y-%m-%d-%H-%m-%S')
+log_path = 'pcg/specrnn/logs/' + formatted_dt + '/'
+os.makedirs(log_path)
+
 # Training history visualization
-TrainingHistory(history).plot()
+TrainingHistory(history).save(log_path)
+
+# Saving the model configuration
+raw_json = open(log_path + 'model.json', 'w')
+raw_json.write(kerasmodels.model.to_json())
+raw_json.close()
+
+pretty_json = open(log_path + 'model.txt', 'w')
+pretty_json.write(pformat(kerasmodels.model.to_json()))
+pretty_json.close()
+
 
 # Confusion Matrix
 print('Calculating the Confusion Matrices...')
 train_preds = np.round(kerasmodels.model.predict(np.stack(data_train['spectrogram']))).astype('int32')
 test_preds = np.round(kerasmodels.model.predict(np.stack(data_test['spectrogram']))).astype('int32')
 
-ConfusionMatrix(data_train['label'].values, train_preds, ['Normal', 'Abnormal']).plot('Test Confusion Matrix')
-ConfusionMatrix(data_test['label'].values, test_preds, ['Normal', 'Abnormal']).plot('Validation Confusion Matrix')
+ConfusionMatrix(data_train['label'].values, train_preds, ['Normal', 'Abnormal']).save('Train Confusion Matrix', log_path)
+ConfusionMatrix(data_test['label'].values, test_preds, ['Normal', 'Abnormal']).save('Test Confusion Matrix', log_path)
