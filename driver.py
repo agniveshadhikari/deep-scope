@@ -43,19 +43,26 @@ data['spectrogram'] = [pad_sequences(s, 900, 'float32').T
 print('Splitting dataset into test and train sets...')
 
 hyperparameter_vectors = [
+    # Keeping layer 2 at 10
     (30, 10, 0, 0, (900, 51)),
-
+    (50, 10, 0, 0, (900, 51)),
+    (80, 10, 0, 0, (900, 51)),
     (100, 10, 0, 0, (900, 51)),
     (200, 10, 0, 0, (900, 51)),
     (300, 10, 0, 0, (900, 51)),
 
-    (100, 20, 0, 0, (900, 51)),
-    (200, 20, 0, 0, (900, 51)),
-    (300, 20, 0, 0, (900, 51)),
+    # Will overfit above 100 for lstm_1
+    (100, 10, 0.2, 0, (900, 51)),
+    (200, 10, 0.2, 0, (900, 51)),
+    (300, 10, 0.2, 0, (900, 51)),
 
-    (100, 30, 0, 0, (900, 51)),
-    (200, 30, 0, 0, (900, 51)),
-    (300, 30, 0, 0, (900, 51)),
+    (100, 10, 0.4, 0, (900, 51)),
+    (200, 10, 0.4, 0, (900, 51)),
+    (300, 10, 0.4, 0, (900, 51)),
+
+    (100, 10, 0.6, 0, (900, 51)),
+    (200, 10, 0.6, 0, (900, 51)),
+    (300, 10, 0.6, 0, (900, 51)),
 ]
 
 
@@ -116,7 +123,7 @@ for hyperparameter_vector in hyperparameter_vectors:
 
         # Create directory for logging
         formatted_dt = start_time.strftime('%y-%m-%d-%H-%m-%S')
-        log_path = 'pcg/specrnn/logs/' + formatted_dt + '/' + 'fold-{fold_id}'.format(fold_id=fold_id) + '/'
+        log_path = '/home/agnivesh/model_logs/A/' + "{}_{} {}_{} {}".format(*t) + '/' + 'fold-{fold_id}'.format(fold_id=fold_id) + '/'
         os.makedirs(log_path)
 
         # Training history visualization
