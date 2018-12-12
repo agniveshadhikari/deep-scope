@@ -63,19 +63,49 @@ hyperparameter_vectors = [
     (100, 10, 0.6, 0, (900, 51)),
     (200, 10, 0.6, 0, (900, 51)),
     (300, 10, 0.6, 0, (900, 51)),
+
+    (200, 10, 0.8, 0, (900, 51)),
+    (300, 10, 0.8, 0, (900, 51)),
+
+    # Second layer increased
+    (30, 20, 0, 0, (900, 51)),
+    (50, 20, 0, 0, (900, 51)),
+    (80, 20, 0, 0, (900, 51)),
+    (100, 20, 0, 0, (900, 51)),
+
+    (30, 30, 0, 0, (900, 51)),
+    (50, 30, 0, 0, (900, 51)),
+    (80, 30, 0, 0, (900, 51)),
+    (100, 30, 0, 0, (900, 51)),
+
+    # Adding layer 2 dropouts, along with low dropout for lstm_1
+    (30, 30, 0, 0.4, (900, 51)),
+    (50, 30, 0.2, 0.4, (900, 51)),
+    (80, 30, 0.4, 0.4, (900, 51)),
+    (100, 30, 0.6, 0.4, (900, 51)),
+
+    (30, 30, 0, 0.6, (900, 51)),
+    (50, 30, 0.2, 0.6, (900, 51)),
+    (80, 30, 0.4, 0.6, (900, 51)),
+    (100, 30, 0.6, 0.6, (900, 51)),
+
+    (30, 30, 0, 0.8, (900, 51)),
+    (50, 30, 0.2, 0.8, (900, 51)),
+    (80, 30, 0.4, 0.8, (900, 51)),
+    (100, 30, 0.6, 0.8, (900, 51)),
+
+
 ]
 
 
 for hyperparameter_vector in hyperparameter_vectors:
 
-    start_time = datetime.now()
-    print('Starting at time', start_time)
-    print('For hyperparameters: ', hyperparameter_vector)
-
-
     fold_id = 0
     for data_train_ids, data_test_ids in StratifiedKFold(n_splits=5).split(data, data['label']):
 
+        start_time = datetime.now()
+        print('Starting at time', start_time)
+        print('For hyperparameters: ', hyperparameter_vector)
         print('Training for fold', fold_id)
 
         model = kerasmodels.model_A(*hyperparameter_vector)
@@ -123,7 +153,7 @@ for hyperparameter_vector in hyperparameter_vectors:
 
         # Create directory for logging
         formatted_dt = start_time.strftime('%y-%m-%d-%H-%m-%S')
-        log_path = '/home/agnivesh/model_logs/A/' + "{}_{} {}_{} {}".format(*t) + '/' + 'fold-{fold_id}'.format(fold_id=fold_id) + '/'
+        log_path = '/home/agnivesh/model_logs/A/' + "{}_{} {}_{} {}".format(*hyperparameter_vector) + '/' + 'fold-{fold_id}'.format(fold_id=fold_id) + '/'
         os.makedirs(log_path)
 
         # Training history visualization
