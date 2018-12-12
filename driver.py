@@ -42,17 +42,36 @@ data['spectrogram'] = [pad_sequences(s, 900, 'float32').T
 #       But the default is to shuffle, so statistically it shouldn't be a problem
 print('Splitting dataset into test and train sets...')
 
-for model in kerasmodels.models:
+hyperparameter_vectors = [
+    (30, 10, 0, 0, (900, 51)),
+
+    (100, 10, 0, 0, (900, 51)),
+    (200, 10, 0, 0, (900, 51)),
+    (300, 10, 0, 0, (900, 51)),
+
+    (100, 20, 0, 0, (900, 51)),
+    (200, 20, 0, 0, (900, 51)),
+    (300, 20, 0, 0, (900, 51)),
+
+    (100, 30, 0, 0, (900, 51)),
+    (200, 30, 0, 0, (900, 51)),
+    (300, 30, 0, 0, (900, 51)),
+]
+
+
+for hyperparameter_vector in hyperparameter_vectors:
+
     start_time = datetime.now()
     print('Starting at time', start_time)
-    print('For model:')
-    model.summary()
+    print('For hyperparameters: ', hyperparameter_vector)
 
 
     fold_id = 0
     for data_train_ids, data_test_ids in StratifiedKFold(n_splits=5).split(data, data['label']):
 
         print('Training for fold', fold_id)
+
+        model = kerasmodels.model_A(*hyperparameter_vector)
 
         data_train = data.iloc[data_train_ids]
         data_test  = data.iloc[data_test_ids]
@@ -85,13 +104,13 @@ for model in kerasmodels.models:
 
         # Training
         print('Training the model...')
-        kerasmodels.model.compile(loss='binary_crossentropy',
+        model.compile(loss='binary_crossentropy',
                                 optimizer=RMSprop(0.0005),
                                 metrics=['accuracy'])
 
-        history = kerasmodels.model.fit(np.stack(data_train['spectrogram']), np.stack(data_train['label']),
+        history = model.fit(np.stack(data_train['spectrogram']), np.stack(data_train['label']),
                             batch_size=500,
-                            epochs=200,
+                            epochs=50,
                             validation_data=(np.stack(data_test['spectrogram']), np.stack(data_test['label'].values)))
 
 
@@ -105,23 +124,23 @@ for model in kerasmodels.models:
 
         # Saving the model configuration
         raw_json = open(log_path + 'model_architecture.json', 'w')
-        raw_json.write(kerasmodels.model.to_json())
+        raw_json.write(model.to_json())
         raw_json.close()
 
         pretty_json = open(log_path + 'model_description.txt', 'w')
-        pretty_json.write(pformat(kerasmodels.model.to_json()))
+        pretty_json.write(pformat(model.to_json()))
         pretty_json.close()
 
         # Save weights
-        kerasmodels.model.save_weights(log_path + 'weights.h5')
+        model.save_weights(log_path + 'weights.h5')
 
         # Save the model
-        kerasmodels.model.save(log_path + 'model.h5')
+        model.save(log_path + 'model.h5')
 
         # Confusion Matrix
         print('Calculating the Confusion Matrices...')
-        train_preds = np.round(kerasmodels.model.predict(np.stack(data_train['spectrogram']))).astype('int32')
-        test_preds = np.round(kerasmodels.model.predict(np.stack(data_test['spectrogram']))).astype('int32')
+        train_preds = np.round(model.predict(np.stack(data_train['spectrogram']))).astype('int32')
+        test_preds = np.round(model.predict(np.stack(data_test['spectrogram']))).astype('int32')
 
         ConfusionMatrix(data_train['label'].values, train_preds, ['Normal', 'Abnormal']).save('Train Confusion Matrix', log_path)
         ConfusionMatrix(data_test['label'].values, test_preds, ['Normal', 'Abnormal']).save('Test Confusion Matrix', log_path)
