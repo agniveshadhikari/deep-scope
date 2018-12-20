@@ -1,4 +1,4 @@
-import scipy.signal as signal
+from scipy import signal
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 
@@ -9,13 +9,16 @@ default_nperseg = 100
 
 def get(data, fs, nperseg=None, noverlap=None, scaled=False):
     # TODO Check the doc page for signal.spectrogram. Below, there are
-    # a couple of different methods to find the PSD for a waveform.
-    # Compare how those match up to regular spectrograms.
+    #   a couple of different methods to find the PSD for a waveform.
+    #   Compare how those match up to regular spectrograms.
     # TODO One hyperparameter is the spectrogram resolution in the time domain.
-    # Find the lowest res which can still give the base accuracy.
+    #   Find the lowest res which can still give the base accuracy.
     # TODO Another hyperarameter is the frequency domain resolution.
-    # Less samples => less compute
+    #   Less samples => less compute
     # TODO Check if scaling is being done in the correct axis
+    # TODO Scaling seems to impair training almost completely.
+    #   Currently turned off in a ghetto way.
+
     if nperseg is None:
         nperseg = default_nperseg
     f, t, s = signal.spectrogram(x=data, fs=fs, nperseg=nperseg, noverlap=noverlap)
