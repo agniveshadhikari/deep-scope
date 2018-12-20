@@ -1,18 +1,41 @@
 from keras.models import Sequential
 from keras.layers import Activation, LSTM, Dense, Dropout, BatchNormalization
 
-model = Sequential(
-    layers=[
-        BatchNormalization(),
-        LSTM(100, input_shape=(900, 51), return_sequences=True, dropout=0.0),
-        # Dropout(0.5),
-        LSTM(20, dropout=0.0),
-        # Dropout(0.4),
-        Dense(1, activation='sigmoid')
-    ]
-)
 
+def model_A(lstm_1, lstm_2, dropout_1, dropout_2, input_shape):
+    """
+    Model A Architecture:
+    BatchNorm
+    LSTM_1
+    LSTM_2
+    Dense
+    """
 
-# TODO Implement functions that take args the hyperparameters and returns the model.
-#       This way, models with same architectures but different hyparams, and different
-#       architectures won't get mixed up. see models.py
+    return Sequential(
+        layers=[
+            BatchNormalization(input_shape=input_shape),
+            LSTM(lstm_1, return_sequences=True, dropout=dropout_1),
+            LSTM(lstm_2, dropout=dropout_2),
+            Dense(1, activation='sigmoid')
+        ]
+    )
+
+def model_B(lstm_1, lstm_2, dropout_1, dropout_2, input_shape):
+    """
+    Model B Architecture:
+    BatchNorm
+    LSTM_1
+    LSTM_2
+    Dense
+    """
+
+    return Sequential(
+        layers=[
+            BatchNormalization(input_shape=input_shape),
+            LSTM(lstm_1, return_sequences=True, dropout=dropout_1),
+            BatchNormalization(),
+            LSTM(lstm_2, dropout=dropout_2),
+            Dense(1, activation='sigmoid')
+        ]
+    )
+

@@ -76,6 +76,7 @@ class ConfusionMatrix:
 
         filename = path + title + '.svg'
         plt.savefig(filename)
+        plt.close()
 
 
 class TrainingHistory:
@@ -123,3 +124,4 @@ class TrainingHistory:
         plt.ylim(top=1, bottom=0)
         plt.legend(['Train Loss', 'Test Loss'], loc='best')
         plt.savefig(path + 'Training History.svg')
+        plt.close()
