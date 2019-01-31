@@ -41,7 +41,7 @@ def plot(data, fs, nperseg=None, noverlap=None):
     return f, t, s
 
 def save(data, fs, path):
-    # TODO Complete this. Right now it's not required 
+    # TODO Complete this. Right now it's not required
     # as computation of spectrograms is not a bottleneck at all.
     f, t, s = get(data, fs)
     
