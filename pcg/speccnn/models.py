@@ -18,6 +18,14 @@ def model_A(input_shape):
         Conv1D(64, kernel_size=5, strides=1),
         MaxPool1D(pool_size=2),
 
+        Conv1D(64, kernel_size=5, strides=1),
+        Conv1D(64, kernel_size=5, strides=1),
+        MaxPool1D(pool_size=2),
+
+        Conv1D(64, kernel_size=5, strides=1),
+        Conv1D(64, kernel_size=5, strides=1),
+        MaxPool1D(pool_size=2),
+
         LSTM(20, return_sequences=True),
         LSTM(10),
         Dense(1, activation='sigmoid')

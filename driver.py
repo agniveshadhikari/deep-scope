@@ -100,13 +100,13 @@ for hyperparameter_vector in hyperparameter_vectors:
 
         history = model.fit(np.stack(data_train['spectrogram']), np.stack(data_train['label']),
                             batch_size=512,
-                            epochs=50,
+                            epochs=150,
                             validation_data=(np.stack(data_test['spectrogram']), np.stack(data_test['label'].values)))
 
 
         # Create directory for logging
         formatted_dt = start_time.strftime('%y-%m-%d-%H-%m-%S')
-        log_path = '/home/agnivesh/model_logs/speccnn/a/A/' + "{}_{} {}_{} {}".format(*hyperparameter_vector) + '/' + 'fold-{fold_id}'.format(fold_id=fold_id) + '/'
+        log_path = '/home/agnivesh/model_logs/speccnn/a/A/' + str(hyperparameter_vector) + '/' + 'fold-{fold_id}'.format(fold_id=fold_id) + '/'
         os.makedirs(log_path)
 
         # Training history visualization
