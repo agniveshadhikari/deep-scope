@@ -8,7 +8,7 @@ from datetime import datetime
 from glob import iglob
 import os
 # Local modules
-from pcg.specrnn import spectrogram, kerasmodels
+from pcg.speccnn import spectrogram, models
 from pcg.datasets import PhysionetCinC as PCC
 from pcg.metrics import ConfusionMatrix, TrainingHistory
 # Misc
@@ -30,7 +30,7 @@ print('Starting at time', start_time)
 
 # Get the data for training-a
 print('Reading Dataset...')
-data = PCC.get_subset('b')
+data = PCC.get_subset('a')
 
 # Compute the spectrograms and add as a column to data
 print('Computing Spectrograms...')
@@ -43,8 +43,7 @@ data['spectrogram'] = [pad_sequences(s, 900, 'float32').T
 print('Splitting dataset into test and train sets...')
 
 hyperparameter_vectors = [
-    # Keeping layer 2 at 10
-    (30, 10, 0.5, 0, (900, 51)),
+    ((900, 51)),
 
 ]
 
@@ -62,7 +61,7 @@ for hyperparameter_vector in hyperparameter_vectors:
         print('For hyperparameters: ', hyperparameter_vector)
         print('Training for fold', fold_id)
 
-        model = kerasmodels.model_B(*hyperparameter_vector)
+        model = models.model_A(hyperparameter_vector)
 
         data_train = data.iloc[data_train_ids]
         data_test  = data.iloc[data_test_ids]
@@ -107,7 +106,7 @@ for hyperparameter_vector in hyperparameter_vectors:
 
         # Create directory for logging
         formatted_dt = start_time.strftime('%y-%m-%d-%H-%m-%S')
-        log_path = '/home/agnivesh/model_logs/all/B/' + "{}_{} {}_{} {}".format(*hyperparameter_vector) + '/' + 'fold-{fold_id}'.format(fold_id=fold_id) + '/'
+        log_path = '/home/agnivesh/model_logs/speccnn/a/A/' + "{}_{} {}_{} {}".format(*hyperparameter_vector) + '/' + 'fold-{fold_id}'.format(fold_id=fold_id) + '/'
         os.makedirs(log_path)
 
         # Training history visualization
